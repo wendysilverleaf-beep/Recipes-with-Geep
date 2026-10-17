@@ -1,4 +1,84 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#fff8f1"><title>Recipes with Geep</title><style>
-:root{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;color:#29352d;background:#fff8f1}*{box-sizing:border-box}body{margin:0}header{background:#e7eee3;padding:42px 20px 34px;text-align:center}h1{font-family:Georgia,serif;font-size:clamp(2.1rem,7vw,3.4rem);margin:0 0 10px}header p{margin:0;color:#526452}main{max-width:750px;margin:auto;padding:28px 18px 60px}h2{font-family:Georgia,serif;margin:32px 0 14px;font-size:1.5rem}.recipe{display:flex;gap:15px;align-items:center;background:#fff;border:1px solid #e5e1d7;border-radius:17px;padding:19px;margin:12px 0;text-decoration:none;color:inherit;box-shadow:0 3px 12px #3e36200b}.recipe:focus-visible{outline:3px solid #557c58}.emoji{font-size:2rem;background:#f5f1e7;border-radius:13px;width:62px;height:62px;display:grid;place-items:center;flex-shrink:0}.info{flex:1}.name{display:block;font-size:1.08rem;font-weight:700;line-height:1.3}.sub{display:block;color:#687267;font-size:.9rem;margin-top:5px}.arrow{font-size:1.5rem;color:#608264}.tip{background:#f1f3eb;border-radius:14px;padding:17px 20px;margin-top:35px;line-height:1.55}.tip strong{display:block;margin-bottom:5px}footer{text-align:center;font-size:.83rem;color:#7a8077;margin-top:38px}
-</style></head><body><header><div style="font-size:2.3rem" aria-hidden="true">📖 🍃</div><h1>Recipes with Geep</h1><p>Our family favourites, all in one place</p></header><main><h2>🍨 Ice Cream &amp; Sorbets</h2><a class="recipe" href="chocolate_ice_cream_family_favourite_v2_anylist.html"><span class="emoji" aria-hidden="true">🍫</span><span class="info"><span class="name">Chocolate Ice Cream, Family Favourite v2</span><span class="sub">Our chocolate favourite · experimental scoopability update</span></span><span class="arrow" aria-hidden="true">›</span></a><h2>🍝 Main Dishes</h2><a class="recipe" href="beef_mushroom_spinach_tagliatelle_anylist.html"><span class="emoji" aria-hidden="true">🍝</span><span class="info"><span class="name">Beef, Mushroom &amp; Spinach Tagliatelle</span><span class="sub">Creamy family favourite · serves 3</span></span><span class="arrow" aria-hidden="true">›</span></a><div class="tip"><strong>💡 Save a recipe to AnyList</strong>Tap a recipe above to open its webpage. Then use your browser's Share option, choose AnyList, and save the imported recipe. You can add your own photo in AnyList.</div><footer>Made for our kitchen experiments ♡</footer></main></body></html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Recipes with Geep</title>
+<meta name="theme-color" content="#fff8ee">
+<style>
+:root{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color:#28342b;background:#fffaf3}
+*{box-sizing:border-box}
+body{margin:0}header{background:#f0e9d9;padding:32px 20px;text-align:center}
+h1{font-size:clamp(2rem,7vw,3rem);margin:0 0 8px}header p{margin:0;color:#657163}
+main{max-width:740px;margin:auto;padding:24px 18px 70px}
+label{display:block;font-weight:600;margin-bottom:8px}
+input{width:100%;font:inherit;padding:13px 15px;border:1px solid #c8cbbf;border-radius:12px;background:white}
+#status{color:#647166;font-size:.92rem;margin:15px 0}
+ul{list-style:none;padding:0;margin:0;display:grid;gap:11px}
+li a{display:flex;align-items:center;gap:13px;background:white;border:1px solid #e4dfd4;border-radius:14px;padding:16px;color:#28342b;text-decoration:none;box-shadow:0 2px 6px #3b2e1710}
+li a:hover,li a:focus{border-color:#9cae91;background:#f7fbf5}
+li a span:first-child{font-size:1.5rem}
+small{display:block;color:#7a8075;margin-top:4px}
+footer{text-align:center;color:#7c8076;font-size:.85rem;padding:15px}
+button{background:#47654d;color:white;border:0;border-radius:10px;padding:9px 14px;font:inherit;cursor:pointer}
+</style>
+</head>
+<body>
+<header><h1>🍋 Recipes with Geep</h1><p>Our little collection of kitchen favourites</p></header>
+<main>
+<label for="search">Find a recipe</label>
+<input id="search" type="search" placeholder="Search recipes…" autocomplete="off">
+<p id="status" role="status">Finding your recipes…</p>
+<ul id="recipes"></ul>
+<div id="retry" hidden><button type="button" onclick="loadRecipes()">Try again</button></div>
+</main>
+<footer>New recipes appear automatically after you upload them to GitHub.</footer>
+<script>
+const owner="wendysilverleaf-beep", repo="Recipes-with-Geep", branch="main";
+const list=document.querySelector("#recipes"), status=document.querySelector("#status");
+let all=[];
+function titleFrom(filename){
+  return filename.replace(/\.html$/i,"")
+    .replace(/(?:_anylist|_family_favourite|_family_favorite)(?=_|$)/gi,"")
+    .replace(/_v(\d+)(?=_|$)/gi," (version $1)")
+    .replace(/_+/g," ").replace(/-/g," ")
+    .replace(/\b\w/g,c=>c.toUpperCase()).trim();
+}
+function render(){
+ const q=document.querySelector("#search").value.trim().toLowerCase();
+ const matches=all.filter(x=>titleFrom(x.name).toLowerCase().includes(q));
+ list.replaceChildren();
+ for(const file of matches){
+   const li=document.createElement("li"), a=document.createElement("a");
+   a.href=encodeURIComponent(file.name); // relative link to the published HTML page
+   const emoji=document.createElement("span");emoji.textContent="🍽️";
+   const title=document.createElement("span");title.textContent=titleFrom(file.name);
+   a.append(emoji,title);li.append(a);list.append(li);
+ }
+ status.textContent=all.length
+   ? `${matches.length} recipe${matches.length===1?"":"s"}${q?" found":" in your collection"}`
+   : "No recipes found yet.";
+}
+async function loadRecipes(){
+ document.querySelector("#retry").hidden=true;
+ status.textContent="Finding your recipes…";
+ try{
+   const url=`https://api.github.com/repos/${owner}/${repo}/contents/?ref=${branch}`;
+   const res=await fetch(url,{cache:"no-store",headers:{"Accept":"application/vnd.github+json"}});
+   if(!res.ok)throw new Error("GitHub returned "+res.status);
+   const files=await res.json();
+   if(!Array.isArray(files))throw new Error("Unexpected response");
+   all=files.filter(f=>f.type==="file"&&/\.html$/i.test(f.name)&&f.name.toLowerCase()!=="index.html")
+     .sort((a,b)=>titleFrom(a.name).localeCompare(titleFrom(b.name)));
+   render();
+ }catch(err){
+   status.textContent="Couldn't load the recipe list just now. Please try again.";
+   document.querySelector("#retry").hidden=false;
+   console.error(err);
+ }
+}
+document.querySelector("#search").addEventListener("input",render);
+loadRecipes();
+</script>
+</body>
+</html>
